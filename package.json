@@ -1,0 +1,44 @@
+{
+  "name": "sweet-error",
+  "version": "1.0.1",
+  "description": "Makes nodeJs Error cleaner, more readable and better formatted",
+  "author": "𝖊𝖈𝖍𝖔 <https://github.com/echo-64>",
+  "license": "MIT",
+  "main": "./dist/SweetError.js",
+  "module": "./dist/SweetError.mjs",
+  "types": "./dist/types/SweetError.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/SweetError.js",
+      "import": "./dist/SweetError.mjs",
+      "types": "./dist/types/SweetError.d.ts"
+    }
+  },
+  "files": [
+    "./dist",
+    "./LICENSE",
+    "./README.md",
+    "./package.json",
+    "./sweet-error.png"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/echo-64/sweet-error.git"
+  },
+  "scripts": {
+    "clean": "rm -rf ./dist/*",
+    "watch": "rollup -c -w",
+    "build": "npm run clean && rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.15.23",
+    "tslib": "^2.8.1"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "json5": "^2.2.3",
+    "stack-utils": "^2.0.6"
+  }
+}

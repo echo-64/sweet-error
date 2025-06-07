@@ -1,0 +1,17 @@
+{
+  "include": ["src", "src/lib/SweetError.ts"],
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "target": "ES2017",
+    "module": "ES2022",
+    "removeComments": false,
+    "declaration": true,
+    "declarationDir": "./dist/types",
+    "moduleResolution": "bundler",
+    "paths": {
+      "undici-types": ["./node_modules/undici-types/index.d.ts"]
+    }
+  }
+}
