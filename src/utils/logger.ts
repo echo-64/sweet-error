@@ -1,28 +1,32 @@
 import chalk from 'chalk';
+import SweetError from '../SweetError';
 import { colorize } from './colorize';
 import { indent } from './indent';
 import { wrap } from './wrap';
 import { format } from './format';
-import { SweetError } from '../SweetError';
 
 /**
- * The function that controls how the Error appears and how its parts are arranged
+ * A customizable logging orchestrator that defines the visual structure and
+ * sequence of the error output.
+ * - This function is intended to be called with a {@link SweetError} context,
+ * providing access to the error's data (messages, stack, code) and internal
+ * formatting utilities.
  *
- * @memberof SweetError
- * @example ```js
- * function logger() {
- *   // you have access to all the properties of the SweetError to customize the way it appears
- *   const { messages, name, code, stack, func } = this;
- *   // also some utils may be helpful
- *   const { format, indent, wrap } = func;
- * }
+ * @example
+ * ```js
+ * // Customizing the output via the logger option
+ * const customLogger = function () {
+ *   const { messages, exitCode, func } = this;
+ *   const { colorize, indent } = func;
+ *   console.log(colorize('--- ERROR REPORT ---'));
+ *   messages.forEach(msg => console.log(indent(msg, 4)));
+ *   console.log('Exit Status:', exitCode);
+ * };
  *
- * const opts = { logger };
- *
- * new SweetError([], opts);
+ * new SweetError(['Failed to connect'], { logger: customLogger });
  * ```
  */
-export function logger(): void {
+export function logger(this: SweetError): void {
   logName(this);
 
   for (let i = 0; i < this.messages.length; i++) {
@@ -31,13 +35,13 @@ export function logger(): void {
 
     if (typeof message === 'string') {
       if (this?.name) {
-        if (this?.options?.colorize === true) {
+        if (this.colorize === true) {
           console.log(colorize(indent(wrap(message), 2)));
         } else {
           console.log(indent(wrap(message), 2));
         }
       } else {
-        if (this?.options?.colorize === true) {
+        if (this.colorize === true) {
           console.log(colorize(wrap(message)));
         } else {
           console.log(wrap(message));
@@ -58,70 +62,136 @@ export function logger(): void {
     }
   }
 
-  console.log('');
-
   logStack(this);
-
-  console.log('');
 
   logCode(this);
 
-  if (this?.exitCode) {
-    console.log('');
-
-    this?.options?.colorize
-      ? console.log('🟡', chalk.yellow('Exit:'), this.exitCode)
-      : console.log('🟡', 'Exit:', this.exitCode);
-  }
+  logExitCode(this);
 }
 
 /**
- * Log the SweetError name
+ * Logs the error name.
  *
- * @memberof logger
- * @param {SweetError} error
+ * @param {SweetError} error - The error object containing the name.
  */
 function logName(error: SweetError): void {
-  if (!error?.name) return;
+  if (!error?.name) {
+    return;
+  }
+
   return console.log('🔴', chalk.red.bold.underline(error.name));
 }
 
 /**
- * Log the SweetError code
- * @memberof logger
- * @param {SweetError} error
+ * Logs the error code.
+ *
+ * @param {SweetError} error - The error object containing the code.
  */
 function logCode(error: SweetError): void {
-  if (!error?.code) return;
+  if (!error?.code) {
+    return;
+  }
 
-  return error?.options?.colorize
+  console.log('');
+
+  return error?.colorize
     ? console.log(indent(chalk.gray.underline(`${error.code}`), 2))
-    : console.log(indent(chalk.underline(`${error.code}`), 2))
+    : console.log(indent(chalk.underline(`${error.code}`), 2));
 }
 
 /**
- * Log the SweetError stack trace lines
- * @memberof logger
- * @param {SweetError} error
+ * Logs the code used to exit the node.js process.
+ *
+ * @param {SweetError} error - The error object containing the exit code.
+ */
+function logExitCode(error: SweetError): void {
+  if (typeof error?.exitCode === 'undefined') {
+    return;
+  }
+
+  console.log('');
+
+  error.colorize
+    ? console.log('🟡', chalk.yellow('Exit code:'), error.exitCode)
+    : console.log('🟡', 'Exit code:', error.exitCode);
+}
+
+/**
+ * Logs the stack trace of an error, with options for different location styles.
+ *
+ * @param {SweetError} error - The error object containing the stack trace.
  */
 function logStack(error: SweetError): void {
   error.stack.shift();
 
-  error.stack.forEach((object: any) => {
-    if (!object) return;
+  console.log('');
 
-    let stackLine = '';
+  error.stack.forEach(stackObject => {
+    const { line, column, file, ...rest } = stackObject;
 
-    Object.keys(object).forEach((key: any) => {
-      if (error?.options?.colorize === true) {
-        stackLine += `${chalk.bold(key)}: ${colorize(
-          chalk.italic(object[key])
-        )} `;
-      } else {
-        stackLine += `${chalk.bold(key)}: ${chalk.italic(object[key])} `;
-      }
-    });
-
-    return console.log(indent('→ ' + stackLine.trim(), 2));
+    switch (error.locationStyle) {
+      case 'label':
+        console.log(
+          indent(
+            '→ ' +
+              formatStackLine({
+                line,
+                column,
+                file,
+                ...rest,
+              }),
+            2
+          )
+        );
+        break;
+      case 'coords':
+        console.log(
+          indent(
+            '→ ' +
+              formatStackLine({
+                file: `${stackObject['file']}:${line}:${column}`,
+                ...rest,
+              }),
+            2
+          )
+        );
+        break;
+      case 'full':
+        console.log(
+          indent(
+            '→ ' +
+              formatStackLine({
+                line,
+                column,
+                file: `${stackObject['file']}:${line}:${column}`,
+                ...rest,
+              }),
+            2
+          )
+        );
+        break;
+      default:
+        break;
+    }
   });
+
+  /**
+   * Formats a property string from an object.
+   *
+   * This function takes an object and returns a formatted string that includes each key-value pair,
+   * optionally colorizing the output based on a provided error configuration.
+   *
+   * @param {Object} stackLine - The object containing properties to format.
+   * @returns {string} A formatted string representing the key-value pairs.
+   */
+  function formatStackLine(stackLine: any): string {
+    return Object.keys(stackLine)
+      .map(prop =>
+        error?.colorize == true
+          ? `${chalk.bold(prop)}: ${colorize(chalk.italic(stackLine[prop]))} `
+          : `${chalk.bold(prop)}: ${chalk.italic(stackLine[prop])} `
+      )
+      .join('')
+      .trim();
+  }
 }
