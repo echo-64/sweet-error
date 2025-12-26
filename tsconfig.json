@@ -1,5 +1,5 @@
 {
-  "include": ["src", "src/lib/SweetError.ts"],
+  "include": ["src"],
   "compilerOptions": {
     "alwaysStrict": true,
     "rootDir": "./src",
