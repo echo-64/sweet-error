@@ -3,7 +3,7 @@ import json5 from "json5";
 /**
  * json5 stringifier
  *
- * @param {object} obj
+ * @param {object} object
  * @returns {string}
  */
 export function format(object: any): string {
