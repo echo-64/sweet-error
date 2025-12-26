@@ -18,8 +18,10 @@
     "./dist",
     "./LICENSE",
     "./README.md",
-    "./package.json",
-    "./sweet-error.png"
+    "./screenshots",
+    "./CHANGELOG.md",
+    "./CONTRIBUTING.md",
+    "./package-lock.json"
   ],
   "repository": {
     "type": "git",
