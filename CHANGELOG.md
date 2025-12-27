@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 
 - Removed the `options` instance property.
 - Removed the `logger` instance property.
-- Renamed `SweetErrorOptions` to `Config`.
+- Renamed `SweetErrorOptions` to `ErrorConfig`.
 - Removed named export `SweetError`, the package now uses a default export.
 
 ### Migration Notes
