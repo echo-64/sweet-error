@@ -1,6 +1,6 @@
 {
   "name": "sweet-error",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Makes nodeJs Error cleaner, more readable and better formatted",
   "author": "𝖊𝖈𝖍𝖔 <https://github.com/echo-64>",
   "license": "MIT",
