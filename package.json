@@ -6,10 +6,10 @@
   "license": "MIT",
   "main": "./dist/SweetError.js",
   "module": "./dist/SweetError.mjs",
-  "types": "./dist/types/SweetError.d.ts",
+  "types": "./dist/SweetError.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/SweetError.d.ts",
+      "types": "./dist/SweetError.d.ts",
       "require": "./dist/SweetError.js",
       "import": "./dist/SweetError.mjs"
     }
